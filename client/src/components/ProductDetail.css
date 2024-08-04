@@ -1,0 +1,10 @@
+.product-detail {
+    margin: 20px;
+}
+
+.product-detail-image {
+    max-width: 300px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
