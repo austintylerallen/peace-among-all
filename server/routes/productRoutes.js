@@ -18,12 +18,11 @@ router.get('/', async (req, res) => {
         const products = await Product.find();
         res.json(products);
     } catch (err) {
-        console.error('Error fetching products:', err.message);
         res.status(500).json({ message: err.message });
     }
 });
 
-// Get product by id
+// Get a single product by ID
 router.get('/:id', async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
@@ -32,25 +31,24 @@ router.get('/:id', async (req, res) => {
         }
         res.json(product);
     } catch (err) {
-        console.error('Error fetching product:', err.message);
         res.status(500).json({ message: err.message });
     }
 });
 
 // Add a new product
-router.post('/', auth, adminMiddleware, async (req, res) => { // Make sure the route is '/'
+router.post('/products', auth, adminMiddleware, async (req, res) => {
     const product = new Product({
         name: req.body.name,
         description: req.body.description,
         price: req.body.price,
-        imageUrl: req.body.imageUrl
+        imageUrl: req.body.imageUrl,
+        category: req.body.category
     });
 
     try {
         const newProduct = await product.save();
         res.status(201).json(newProduct);
     } catch (err) {
-        console.error('Error creating product:', err.message);
         res.status(400).json({ message: err.message });
     }
 });
@@ -58,18 +56,37 @@ router.post('/', auth, adminMiddleware, async (req, res) => { // Make sure the r
 // Delete a product
 router.delete('/:id', auth, adminMiddleware, async (req, res) => {
     try {
-        console.log(`Attempting to delete product with ID: ${req.params.id}`);
         const product = await Product.findById(req.params.id);
         if (!product) {
-            console.error(`Product not found with ID: ${req.params.id}`);
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        await Product.deleteOne({ _id: req.params.id });
-        console.log(`Product with ID: ${req.params.id} deleted successfully`);
+        await product.remove();
         res.json({ message: 'Product deleted' });
     } catch (err) {
-        console.error('Error deleting product:', err.message);
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// Add a review to a product
+router.post('/:id/reviews', auth, async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        const review = {
+            user: req.user.id,
+            rating: req.body.rating,
+            comment: req.body.comment
+        };
+
+        product.reviews.push(review);
+        await product.save();
+
+        res.status(201).json(product.reviews);
+    } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });

@@ -1,5 +1,6 @@
 // client/src/components/Contact.js
 import React, { useState } from 'react';
+import '../../src/styles.css';// Ensure you import the CSS file
 
 const Contact = () => {
     const [formData, setFormData] = useState({ name: '', email: '', message: '' });
@@ -16,9 +17,9 @@ const Contact = () => {
     };
 
     return (
-        <div className="contact">
+        <div className="contact-container">
             <h1>Contact Us</h1>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="contact-form">
                 <input
                     type="text"
                     name="name"
@@ -26,6 +27,7 @@ const Contact = () => {
                     onChange={handleChange}
                     placeholder="Your Name"
                     required
+                    className="contact-input"
                 />
                 <input
                     type="email"
@@ -34,6 +36,7 @@ const Contact = () => {
                     onChange={handleChange}
                     placeholder="Your Email"
                     required
+                    className="contact-input"
                 />
                 <textarea
                     name="message"
@@ -41,8 +44,9 @@ const Contact = () => {
                     onChange={handleChange}
                     placeholder="Your Message"
                     required
+                    className="contact-textarea"
                 />
-                <button type="submit">Send</button>
+                <button type="submit" className="contact-button">Send</button>
             </form>
         </div>
     );

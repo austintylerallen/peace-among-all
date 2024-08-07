@@ -1,43 +1,40 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+// import './ProductForm.css';
 
 const ProductForm = () => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState('');
     const [imageUrl, setImageUrl] = useState('');
+    const [category, setCategory] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const token = localStorage.getItem('token');
-        const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                'x-auth-token': token
-            }
-        };
-
-        const newProduct = {
-            name,
-            description,
-            price: Number(price), // Ensure price is sent as a number
-            imageUrl
-        };
-
         try {
+            const token = localStorage.getItem('token');
+            const config = {
+                headers: {
+                    'x-auth-token': token
+                }
+            };
+            const newProduct = {
+                name,
+                description,
+                price,
+                imageUrl,
+                category
+            };
             await axios.post('/api/products', newProduct, config);
-            // Reset form after successful submission
-            setName('');
-            setDescription('');
-            setPrice('');
-            setImageUrl('');
+            alert('Product created successfully');
         } catch (error) {
             console.error('There was an error creating the product!', error);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="product-form">
+            <h2>Create Product</h2>
             <input
                 type="text"
                 placeholder="Name"
@@ -54,7 +51,7 @@ const ProductForm = () => {
             />
             <input
                 type="number"
-                placeholder="Price"
+                placeholder="Price (in cents)"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 required
@@ -66,7 +63,13 @@ const ProductForm = () => {
                 onChange={(e) => setImageUrl(e.target.value)}
                 required
             />
-            <button type="submit">Add Product</button>
+            <select onChange={(e) => setCategory(e.target.value)} required>
+                <option value="">Select Category</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Books">Books</option>
+                <option value="Clothing">Clothing</option>
+            </select>
+            <button type="submit">Create Product</button>
         </form>
     );
 };

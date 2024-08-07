@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './ProductList.css'; // Import the CSS file for styling
+import '../../src/styles.css';
+import ProductForm from './ProductForm';
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [productsPerPage] = useState(5); // Number of products per page
+    const [productsPerPage] = useState(5);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [showForm, setShowForm] = useState(false);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -26,18 +29,6 @@ const ProductList = () => {
         fetchProducts();
     }, []);
 
-    // Filter products based on the search term
-    const filteredProducts = products.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    // Pagination logic
-    const indexOfLastProduct = currentPage * productsPerPage;
-    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
-
-    const paginate = pageNumber => setCurrentPage(pageNumber);
-
     const deleteProduct = async (id) => {
         try {
             const token = localStorage.getItem('token');
@@ -53,27 +44,62 @@ const ProductList = () => {
         }
     };
 
+    const filteredProducts = products.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (selectedCategory ? product.category === selectedCategory : true)
+    );
+
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+    const paginate = pageNumber => setCurrentPage(pageNumber);
+
+    const categoryOptions = [
+        'Electronics',
+        'Sportswear',
+        'Home Appliances'
+    ];
+
     return (
         <div className="product-list">
             <h2>Product List</h2>
-            <input
-                type="text"
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-            />
-            <ul className="product-items">
+            <div className="filters">
+                <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input"
+                />
+                <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="category-select"
+                >
+                    <option value="">Filter by category</option>
+                    {categoryOptions.map(option => (
+                        <option key={option} value={option}>{option}</option>
+                    ))}
+                </select>
+                <button onClick={() => setShowForm(!showForm)} className="create-product-button">
+                    {showForm ? 'Close Form' : 'Create Product'}
+                </button>
+            </div>
+            {showForm && <ProductForm />}
+            <div className="product-grid">
                 {currentProducts.map(product => (
-                    <li key={product._id} className="product-item">
-                        <h3>{product.name}</h3>
-                        <p>{product.description}</p>
-                        <p>${(product.price / 100).toFixed(2)}</p>
+                    <div key={product._id} className="product-card">
                         <img src={product.imageUrl} alt={product.name} className="product-image" />
-                        <button onClick={() => deleteProduct(product._id)} className="delete-button">Delete</button>
-                    </li>
+                        <div className="product-info">
+                            <h3>{product.name}</h3>
+                            <p>{product.description}</p>
+                            <p>${(product.price / 100).toFixed(2)}</p>
+                            <button onClick={() => deleteProduct(product._id)} className="delete-button">Delete</button>
+                        </div>
+                    </div>
                 ))}
-            </ul>
+            </div>
             <Pagination
                 productsPerPage={productsPerPage}
                 totalProducts={filteredProducts.length}
@@ -95,9 +121,9 @@ const Pagination = ({ productsPerPage, totalProducts, paginate }) => {
             <ul className="pagination">
                 {pageNumbers.map(number => (
                     <li key={number} className="page-item">
-                        <a onClick={() => paginate(number)} href="!#" className="page-link">
+                        <button onClick={() => paginate(number)} className="page-link">
                             {number}
-                        </a>
+                        </button>
                     </li>
                 ))}
             </ul>

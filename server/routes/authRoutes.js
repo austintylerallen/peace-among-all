@@ -39,7 +39,7 @@ router.post('/register', [
             res.json({ token });
         });
     } catch (err) {
-        console.error('Error in registration:', err.message);
+        console.error(err.message);
         res.status(500).send('Server error');
     }
 });
@@ -74,7 +74,7 @@ router.post('/login', [
             res.json({ token });
         });
     } catch (err) {
-        console.error('Error in login:', err.message);
+        console.error(err.message);
         res.status(500).send('Server error');
     }
 });
@@ -85,7 +85,7 @@ router.get('/me', auth, async (req, res) => {
         const user = await User.findById(req.user.id).select('-password');
         res.json(user);
     } catch (err) {
-        console.error('Error in fetching user details:', err.message);
+        console.error(err.message);
         res.status(500).send('Server error');
     }
 });

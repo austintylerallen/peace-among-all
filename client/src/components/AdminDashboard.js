@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const AdminDashboard = () => {
     const [products, setProducts] = useState([]);
@@ -10,11 +11,6 @@ const AdminDashboard = () => {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                if (!token) {
-                    console.error("No token found");
-                    return;
-                }
-
                 const config = {
                     headers: {
                         'x-auth-token': token
@@ -35,6 +31,21 @@ const AdminDashboard = () => {
         fetchData();
     }, []);
 
+    const deleteProduct = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            const config = {
+                headers: {
+                    'x-auth-token': token
+                }
+            };
+            await axios.delete(`/api/products/${id}`, config);
+            setProducts(products.filter(product => product._id !== id));
+        } catch (error) {
+            console.error("There was an error deleting the product!", error);
+        }
+    };
+
     return (
         <div>
             <h1>Admin Dashboard</h1>
@@ -43,6 +54,8 @@ const AdminDashboard = () => {
                 {products.map(product => (
                     <li key={product._id}>
                         {product.name} - ${product.price / 100}
+                        <button onClick={() => deleteProduct(product._id)}>Delete</button>
+                        <Link to={`/update-product/${product._id}`}>Update</Link> {/* Add this link */}
                     </li>
                 ))}
             </ul>
